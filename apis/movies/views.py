@@ -52,16 +52,19 @@ def create_or_update_movie_with_payload(movie_id=None):
 class MovieList(Resource):
     @api.marshal_list_with(movie_fields)
     def get(self):
-        kwargs = {}
         actors = request.args.getlist("actor")
         genres = request.args.getlist("genre")
         title_contains = request.args.get("title_contains")
+
+        kwargs = {}
+
         if actors:
             kwargs["actors__in"] = actors
         if genres:
             kwargs["genres__in"] = genres
         if title_contains:
             kwargs["title__icontains"] = title_contains
+
         return list(Movie.objects(**kwargs))
 
     @api.expect(movie_fields, validate=True)
@@ -92,13 +95,13 @@ class MovieDetail(Resource):
 class MovieActionList(Resource):
     @api.expect(movie_action_fields, validate=True)
     def post(self, movie_id):
-        action_data = api.payload["data"]
+        movie_action = api.payload
 
         if movie_action["type"] != "rate":
             api.abort(400, "Action type not supported.")
 
         movie = Movie.objects.get_or_404(id=movie_id)
 
-        movie.rate(mark=action_data["mark"])
+        movie.rate(movie_action["data"]["mark"])
 
         return {"message": "Action performed."}, 201
