@@ -1,5 +1,6 @@
 from flask_restplus import Namespace, Resource, fields
 from mongoengine import ValidationError
+from flask import request
 
 from .models import Movie
 
@@ -42,6 +43,14 @@ def create_or_update_movie_with_payload(movie_id=None):
 class MovieList(Resource):
     @api.marshal_list_with(movie_fields)
     def get(self):
+        actor = request.args.getlist("actor")
+        genre = request.args.getlist("genre")
+        if actor and genre:
+            return list(Movie.objects(actors__in=actor, genres__in=genre))
+        if actor:
+            return list(Movie.objects(actors__in=actor))
+        if genre:
+            return list(Movie.objects(genres__in=genre))
         return list(Movie.objects)
 
     @api.expect(movie_fields, validate=True)
