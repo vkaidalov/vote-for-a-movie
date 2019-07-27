@@ -43,15 +43,17 @@ def create_or_update_movie_with_payload(movie_id=None):
 class MovieList(Resource):
     @api.marshal_list_with(movie_fields)
     def get(self):
-        actor = request.args.getlist("actor")
-        genre = request.args.getlist("genre")
-        if actor and genre:
-            return list(Movie.objects(actors__in=actor, genres__in=genre))
-        if actor:
-            return list(Movie.objects(actors__in=actor))
-        if genre:
-            return list(Movie.objects(genres__in=genre))
-        return list(Movie.objects)
+        kwargs = {}
+        actors = request.args.getlist("actor")
+        genres = request.args.getlist("genre")
+        title_contains = request.args.get("title_contains")
+        if actors:
+            kwargs["actors__in"] = actors
+        if genres:
+            kwargs["genres__in"] = genres
+        if title_contains:
+            kwargs["title__icontains"] = title_contains
+        return list(Movie.objects(**kwargs))
 
     @api.expect(movie_fields, validate=True)
     @api.marshal_with(movie_fields, 201)
