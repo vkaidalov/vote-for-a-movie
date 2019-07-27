@@ -90,17 +90,15 @@ class MovieDetail(Resource):
 
 @api.route("/<movie_id>/actions/")
 class MovieActionList(Resource):
-    @api.expect(movie_action_fields)
+    @api.expect(movie_action_fields, validate=True)
     def post(self, movie_id):
-        movie_action = api.payload.get('type', None)
-        action_data = api.payload.get('data', None)
+        action_data = api.payload["data"]
 
-        if movie_action != 'rate':
+        if movie_action["type"] != "rate":
             api.abort(400, "Action type not supported.")
 
         movie = Movie.objects.get_or_404(id=movie_id)
 
-        mark = action_data.get('mark', None)
-        movie.rate(mark)
+        movie.rate(mark=action_data["mark"])
 
         return {"message": "Action performed."}, 201

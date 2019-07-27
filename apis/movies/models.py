@@ -15,7 +15,7 @@ class Movie(me.Document):
     sum_of_marks = me.IntField(default=0, min_value=0, required=True)
     number_of_marks = me.IntField(default=0, min_value=0, required=True)
 
-    def rate(self, mark=0):
+    def rate(self, mark):
         self.sum_of_marks += mark
         self.number_of_marks += 1
         self.save()
