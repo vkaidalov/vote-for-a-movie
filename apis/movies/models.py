@@ -14,3 +14,8 @@ class Movie(me.Document):
     genres = me.ListField(me.StringField(max_length=32, required=True))
     sum_of_marks = me.IntField(default=0, min_value=0, required=True)
     number_of_marks = me.IntField(default=0, min_value=0, required=True)
+
+    def rate(self, mark):
+        self.sum_of_marks += mark
+        self.number_of_marks += 1
+        self.save()

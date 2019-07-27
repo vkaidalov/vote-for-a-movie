@@ -105,3 +105,10 @@ venv.bak/
 
 # PyCharm IDE
 .idea/
+
+# VScode
+.vscode
+
+# pipenv
+Pipfile
+Pipfile.lock

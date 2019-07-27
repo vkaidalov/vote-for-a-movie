@@ -16,6 +16,15 @@ movie_fields = api.model("Movie", {
     "numberOfMarks": fields.Integer(readonly=True, attribute="number_of_marks")
 })
 
+mark_data_fields = api.model("Mark Data", {
+    "mark": fields.Integer(required=True, min=1, max=100, example=75)
+})
+
+movie_action_fields = api.model("Movie Action", {
+    "type": fields.String(required=True, example="rate"),
+    "data": fields.Nested(mark_data_fields, required=True)
+})
+
 
 def create_or_update_movie_with_payload(movie_id=None):
     if movie_id is not None:
@@ -77,3 +86,19 @@ class MovieDetail(Resource):
     def delete(self, movie_id):
         Movie.objects.get_or_404(id=movie_id).delete()
         return "", 204
+
+
+@api.route("/<movie_id>/actions/")
+class MovieActionList(Resource):
+    @api.expect(movie_action_fields, validate=True)
+    def post(self, movie_id):
+        action_data = api.payload["data"]
+
+        if movie_action["type"] != "rate":
+            api.abort(400, "Action type not supported.")
+
+        movie = Movie.objects.get_or_404(id=movie_id)
+
+        movie.rate(mark=action_data["mark"])
+
+        return {"message": "Action performed."}, 201
