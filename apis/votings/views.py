@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from aniso8601 import parse_datetime
 from aniso8601.exceptions import LeapSecondError
+from bson.objectid import ObjectId
 from flask_restplus import Namespace, Resource, fields
 from mongoengine import ValidationError
 
@@ -20,6 +23,10 @@ voting_fields = api.model("Voting", {
     "maxVotes": fields.Integer(attribute="max_votes", min=1),
     "startDate": fields.DateTime(attribute="start_date"),
     "finishDate": fields.DateTime(attribute="finish_date")
+})
+
+choice_action_fields = api.model("Choice Action", {
+    "type": fields.String(required=True, example="vote")
 })
 
 
@@ -73,3 +80,38 @@ class VotingDetail(Resource):
     @api.marshal_with(voting_fields)
     def get(self, voting_id):
         return Voting.objects.get_or_404(id=voting_id)
+
+
+@api.route("/<voting_id>/choices/<choice_id>/actions/")
+class ChoiceActionList(Resource):
+    @api.expect(choice_action_fields, validate=True)
+    def post(self, voting_id, choice_id):
+        action_type = api.payload.get("type")
+
+        if action_type != "vote":
+            api.abort(400, "Action type not supported.")
+
+        voting = Voting.objects.get_or_404(id=voting_id)
+
+        current_date = datetime.utcnow()
+
+        if voting.start_date and current_date < voting.start_date:
+            api.abort(403, "Voting isn't started yet.")
+
+        if voting.finish_date and current_date > voting.finish_date:
+            api.abort(403, "Voting is finished.")
+
+        if voting.max_votes and voting.current_votes == voting.max_votes:
+            api.abort(403, "Maximum number of votes is reached.")
+
+        choice_object_id = ObjectId(choice_id)
+        for choice in voting.choices:
+            if choice.id == choice_object_id:
+                choice.votes += 1
+                voting.current_votes += 1
+
+                voting.save()
+
+                return "", 204
+
+        api.abort(404, "Choice with specified ID not found.")
