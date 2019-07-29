@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restplus import Api
 
 from apis.movies.views import api as movies
+from apis.votings.views import api as votings
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 api = Api(
@@ -12,3 +13,4 @@ api = Api(
 )
 
 api.add_namespace(movies)
+api.add_namespace(votings)
