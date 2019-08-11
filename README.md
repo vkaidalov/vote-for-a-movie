@@ -2,6 +2,9 @@
 An API server implemented in Flask backed by MongoDB.
 The first try to organize teamwork.
 
+## Technologies
+![Flask, Flask REST-Plus, MongoEngine](https://user-images.githubusercontent.com/43119488/62832713-91fed480-bc3b-11e9-890f-43337a6dbc1a.jpg)
+
 ## Setup
 
 A MongoDB server is supposed to be running at ```localhost:27017```.
