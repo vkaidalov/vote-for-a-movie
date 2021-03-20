@@ -6,7 +6,7 @@ flask-mongoengine==0.9.5
 flask-restplus==0.12.1
 Flask-WTF==0.14.2
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 jsonschema==3.0.1
 MarkupSafe==1.1.1
 mongoengine==0.18.2
